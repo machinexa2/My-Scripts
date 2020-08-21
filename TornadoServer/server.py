@@ -13,14 +13,17 @@ class IndexHandler(tornado.web.RequestHandler):
         self.set_cookie('bug-bounty', get_data)
         self.set_header('X-Requested-With', get_data)
         self.write("Hello Index: " + get_data)
+        print(self.request.headers.get('User-Agent'))
     
     def head(self):
         get_data = self.get_argument('data')
         self.set_cookie('bug-bounty', get_data)
         self.set_header('X-Requested-With', get_data)
         self.write("Hello Index: " + get_data)
+        print(self.request.headers.get('User-Agent'))
 
-
+    def post(self):
+        print(self.request.headers)
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):

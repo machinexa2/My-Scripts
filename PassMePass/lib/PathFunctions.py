@@ -26,4 +26,3 @@ class PathFunction:
         else:
             ypath = xpath
         return ypath
-
