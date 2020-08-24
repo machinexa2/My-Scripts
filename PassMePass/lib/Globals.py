@@ -1,3 +1,4 @@
+from lib.ColoredObject import Color
 sql_dict = { 
         "HOST": "example.com",
         "USERNAME": 'machinexa',
@@ -7,4 +8,4 @@ sql_dict = {
         "BACKUP": '',
         "OTHER": ''
 }
-
+ColorObj = Color()

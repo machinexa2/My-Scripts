@@ -1,10 +1,11 @@
 from argparse import ArgumentParser
+from termcolor import colored
 
-from lib.Globals import sql_dict
+from lib.Globals import sql_dict, ColorObj
 from lib.PathFunctions import PathFunction
 from lib.Functions import starter, connector
 
-parser = ArgumentParser(description="Store and update passwords!")
+parser = ArgumentParser(description=colored("Store and update passwords!",color='yellow'))
 group = parser.add_mutually_exclusive_group()
 parser.add_argument('-H', '--host', type=str, help="Host")
 parser.add_argument('-U', '--username', type=str, help="Username")
@@ -30,14 +31,17 @@ if mode == 'argv':
     sql_dict['BACKUP'] = argv.backup
     sql_dict['OTHER'] = argv.other
 elif mode == 'input':
-    sql_dict['HOST'] = FPathApp.urler(input("Enter Host: ")).replace('http://', 'https://')
-    sql_dict['USERNAME'] = input("Enter Username: ")
-    sql_dict['EMAIL'] = input("Enter Email: ")
-    sql_dict['PASSWORD'] = input("Enter Password: ")
-    sql_dict['2FA'] = input("Enter 2FA: ")
-    sql_dict['BACKUP'] = input("Enter Backup: ")
-
-conn, cursor = connector()
+    sql_dict['HOST'] = FPathApp.urler(input(f"{ColorObj.information} Enter Host: ")).replace('http://', 'https://')
+    sql_dict['USERNAME'] = input(f"{ColorObj.information} Enter Username: ")
+    sql_dict['EMAIL'] = input(f"{ColorObj.information} Enter Email: ")
+    sql_dict['PASSWORD'] = input(f"{ColorObj.information} Enter Password: ")
+    sql_dict['2FA'] = input(f"{ColorObj.information} Enter 2FA: ")
+    sql_dict['BACKUP'] = input(f"{ColorObj.information} Enter Backup: ")
+    sql_dict['OTHER'] = input(f"{ColorObj.information} Enter other data: ")
+try:
+    conn, cursor = connector()
+except Exception as E:
+    print(E)
 
 def insert_mysql():
     statement = "INSERT INTO password (HOST, USERNAME, EMAIL, PASSWORD, 2FA, BACKUP, OTHER) VALUES (%s,%s,%s,%s,%s,%s,%s)"
@@ -83,22 +87,26 @@ def update_mysql(host):
 
 def main():    
     sql_dict['HOST'] = FPathApp.urler(sql_dict['HOST'])
+    const = input(f"{ColorObj.information} Fetch data or edit (F/E)? ")
+    if const == 'F':
+        print(f"{ColorObj.good} Fetching data ..")
+        query_res = fetch_mysql()
+        for i in query_res:
+            print(i)
+        print(f"{ColorObj.good} Fetched!")
+        main();exit()
     for keys,values in sql_dict.items():
-        print("{} ::: {}".format(keys, values))
+        print("{} ::: {}".format(keys, colored(values, color='green')))
     print("")
-    cont = input("Is the data correct (Y/N) or press (F) to fetch and (U) to update existing records: ")
+    cont = input(f"{ColorObj.information} Continue with above value (Y/N) or update value (U): ")
     if cont.upper() == 'Y':
         try:
             insert_mysql()
         except Exception as E:
             print(f"Error {E,E.__class__} occured while inserting data")
             exit(0)
-    elif cont.upper() == 'F':
-        query_res = fetch_mysql()
-        for i in query_res:
-            print(i)
     elif cont.upper() == 'U':
-        up = input("Enter name to update: ")
+        up = input(f"{ColorObj.information} Enter hostname to update: ")
         update_mysql(up)
     else:
         main()
