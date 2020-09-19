@@ -1,0 +1,16 @@
+my table look like this
+Database changed
+MariaDB [passwords]> describe password;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | int(6)       | NO   | PRI | NULL    | auto_increment |
+| HOST     | varchar(50)  | NO   | UNI | NULL    |                |
+| USERNAME | varchar(50)  | YES  |     | NULL    |                |
+| EMAIL    | varchar(50)  | YES  |     | NULL    |                |
+| PASSWORD | varchar(50)  | YES  |     | NULL    |                |
+| 2FA      | varchar(100) | YES  |     | NULL    |                |
+| BACKUP   | varchar(100) | YES  |     | NULL    |                |
+| OTHER    | varchar(100) | YES  |     | NULL    |                |
++----------+--------------+------+-----+---------+----------------+
+8 rows in set (0.069 sec)

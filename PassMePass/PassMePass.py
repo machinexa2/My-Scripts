@@ -31,7 +31,7 @@ if mode == 'argv':
     sql_dict['BACKUP'] = argv.backup
     sql_dict['OTHER'] = argv.other
 elif mode == 'input':
-    sql_dict['HOST'] = FPathApp.urler(input(f"{ColorObj.information} Enter Host: ")).replace('http://', 'https://')
+    sql_dict['HOST'] = str(FPathApp.urler(input(f"{ColorObj.information} Enter Host: "))).replace('http://', 'https://')
     sql_dict['USERNAME'] = input(f"{ColorObj.information} Enter Username: ")
     sql_dict['EMAIL'] = input(f"{ColorObj.information} Enter Email: ")
     sql_dict['PASSWORD'] = input(f"{ColorObj.information} Enter Password: ")
