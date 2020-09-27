@@ -18,6 +18,7 @@ def starter(argv):
         return "config"
     if argv.input:
         return "input"
+    system('service mysql start')
 
 def connector():
     try:
