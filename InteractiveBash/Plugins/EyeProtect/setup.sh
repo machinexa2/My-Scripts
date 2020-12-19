@@ -1,19 +1,25 @@
 apt install x11-xserver-utils sct -y
 
-user="`whoami`"
-if [[ $user != "root" ]]; then
-        user="/home/`whoami`"
+USER="`whoami`"
+if [[ $USER != "root" ]]; then
+        USERDIR="/home/`whoami`"
 else
-        user="/root"
+        USERDIR="/root"
+fi
+
+if [[ ! $(echo "$1" | awk -F '/' '{print $NF}') == "InteractiveBash" ]]; then
+	exit
+else
+	cd $1
 fi
 
 cd Plugins/EyeProtect
-echo "" >> $user/.bashrc
-echo "if [[ \`echo \"\$(date +%T)\"  | awk -F ':' '{print \$1*60*60+\$2*60+\$3}'\` -lt 68400 ]]; then " >> $user/.bashrc
-echo "	xrandr --output LVDS-1 --brightness 1 && echo 10 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 7500 " >> $user/.bashrc
-echo "elif [[ \`echo \"\$(date +%T)\"  | awk -F ':' '{print \$1*60*60+\$2*60+\$3}'\` -lt 75600 ]]; then	" >> $user/.bashrc
-echo "	xrandr --output LVDS-1 --brightness 0.80 && echo 2 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 4000" >> $user/.bashrc
-echo "else" >> $user/.bashrc
-echo "	xrandr --output LVDS-1 --brightness 0.80 && echo 1 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 2350" >> $user/.bashrc
-echo "fi" >> $user/.bashrc
-cd ../../
+	echo "\n" >> "$USERDIR""/.bashrc"
+	echo "if [[ \`echo \"\$(date +%T)\"  | awk -F ':' '{print \$1*60*60+\$2*60+\$3}'\` -lt 68400 ]]; then " >> "$USERDIR""/.bashrc"
+	echo "	xrandr --output LVDS-1 --brightness 1 && echo 10 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 7500 " >> "$USERDIR""/.bashrc"
+	echo "elif [[ \`echo \"\$(date +%T)\"  | awk -F ':' '{print \$1*60*60+\$2*60+\$3}'\` -lt 75600 ]]; then	" >> "$USERDIR""/.bashrc"
+	echo "	xrandr --output LVDS-1 --brightness 0.80 && echo 2 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 4000" >> "$USERDIR""/.bashrc"
+	echo "else" >> "$USERDIR""/.bashrc"
+	echo "	xrandr --output LVDS-1 --brightness 0.80 && echo 1 | tee /sys/class/backlight/acpi_video0/brightness 1>/dev/null && sct 2350" >> "$USERDIR""/.bashrc"
+	echo "fi" >> "$USERDIR""/.bashrc"
+cd $1

@@ -1,10 +1,13 @@
-import random
 import os
-os.system("whoami 1>/tmp/tmp")
-uid = [line.rstrip('\n') for line in open('/tmp/tmp','r')][0]
-path = os.path.dirname(os.path.realpath(__file__))
-cowfile = path+"/Cowsay"
-cowcow = [line.rstrip('\n') for line in open(cowfile)]
-random = random.choice(cowcow)
-text = """cowsay -f %s {Hello %s} """ % (random, uid)
+
+from getpass import getuser
+from random import choice
+
+filename = "CowsayList"
+uid = getuser()
+filepath = os.path.dirname(os.path.realpath(__file__))
+cowfile = [line.rstrip('\n') for line in open(filepath + "/" + filename)]
+random = choice(cowfile)
+text = "cowsay -f {} 'Hello {}' ".format(random, uid)
+
 os.system(text)

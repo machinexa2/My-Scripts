@@ -2,8 +2,8 @@ DIRNAME="InteractiveBash"
 CURRENT="`pwd`"
 
 if [[ $# -eq 0 ]]; then
-	USERDIR="`whoami`"
-	if [[ $USERDIR != "root" ]]; then
+	USER="`whoami`"
+	if [[ $USER != "root" ]]; then
 		USERDIR="/home/`whoami`"
 	else
 		USERDIR="/root"
@@ -16,21 +16,18 @@ if [[ $# -eq 0 ]]; then
 fi
 
 if [[ $# -eq 1 ]]; then
-	cd "$1""/.bash_interactive/InteractiveBash/" || exit
+	CURRENTDIR="$1""/.bash_interactive/InteractiveBash/"
+	cd $CURRENTDIR || exit
 
 	#Plugin No 1. ColorfulTerminal 
 	chmod +x Plugins/ColorfulTerminal/setup.sh
-	bash Plugins/ColorfulTerminal/setup.sh
+	bash Plugins/ColorfulTerminal/setup.sh $CURRENTDIR
 
 	#Plugin No 2. Screensaver
 	chmod +x Plugins/ScreenSaver/setup.sh
-	bash Plugins/ScreenSaver/setup.sh
+	bash Plugins/ScreenSaver/setup.sh $CURRENTDIR
 
-	#Plugin No 3. Espeak
-	chmod +x Plugins/Espeak/setup.sh
-	bash Plugins/Espeak/setup.sh
-
-	#Plugin No 4. EyeProtect
+	#Plugin No 3. EyeProtect
 	chmod +x Plugins/EyeProtect/setup.sh
-	bash Plugins/EyeProtect/setup.sh
+	bash Plugins/EyeProtect/setup.sh $CURRENTDIR
 fi
