@@ -98,7 +98,7 @@ def return_initials():
         word = input("> ")
         if not word:
             break
-        word_list = word.split(':') if ':' in word else None
+        word_list = word.split(',') if ',' in word else None
         if word_list:
             for word in word_list:
                 initial += word[0].upper()
