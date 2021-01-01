@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from termcolor import colored
 
 from lib.Globals import sql_dict, ColorObj
-from lib.PathFunctions import PathFunction
+from lib.PathFunctions import urler
 from lib.Functions import starter, connector
 
 parser = ArgumentParser(description=colored("Store and update passwords!",color='yellow'))
@@ -20,11 +20,10 @@ group.add_argument('-a', '--argv', action="store_true", help="Fetch from command
 group.add_argument('-i', '--input', action="store_true", help="Fetch from input (optional, not implemented)")
 argv = parser.parse_args()
 
-FPathApp = PathFunction()
 mode = starter(argv)
 
 if mode == 'argv':
-    sql_dict['HOST'] = FPathApp.urler(argv.host).replace('http://', 'https://')
+    sql_dict['HOST'] = ender(urler(argv.host).replace('http://', 'https://'), "/")
     sql_dict['USERNAME'] = argv.username
     sql_dict['EMAIL'] = argv.email
     sql_dict['PASSWORD'] = argv.password
@@ -32,7 +31,7 @@ if mode == 'argv':
     sql_dict['BACKUP'] = argv.backup
     sql_dict['OTHER'] = argv.other
 elif mode == 'input':
-    sql_dict['HOST'] = str(FPathApp.urler(input(f"{ColorObj.information} Enter Host: "))).replace('http://', 'https://')
+    sql_dict['HOST'] = ender((urler(input(f"{ColorObj.information} Enter Host: "))).replace('http://', 'https://'), "/")
     sql_dict['USERNAME'] = input(f"{ColorObj.information} Enter Username: ")
     sql_dict['EMAIL'] = input(f"{ColorObj.information} Enter Email: ")
     sql_dict['PASSWORD'] = input(f"{ColorObj.information} Enter Password: ")
@@ -47,7 +46,7 @@ except Exception as E:
 def insert_mysql():
     statement = "INSERT INTO password (HOST, USERNAME, EMAIL, PASSWORD, 2FA, BACKUP, OTHER) VALUES (%s,%s,%s,%s,%s,%s,%s)"
     values = (
-            FPathApp.urler(sql_dict['HOST']).replace('http://', 'https://'),
+            ender(urler(sql_dict['HOST']).replace('http://', 'https://'), "/"),
             sql_dict['USERNAME'],
             sql_dict['EMAIL'],
             sql_dict['PASSWORD'],
@@ -72,22 +71,22 @@ def update_mysql(host):
             where = i[0]
             data = i[1:]
             break
-    
+
     statement = "UPDATE password SET HOST = %s, USERNAME = %s, EMAIL = %s, PASSWORD = %s, 2FA = %s, BACKUP = %s, OTHER = %s WHERE ID = %s"
     values = (
-            FPathApp.urler(sql_dict['HOST']).replace('http://', 'https://'),
+            ender(urler(sql_dict['HOST']).replace('http://', 'https://'), "/"),
             sql_dict['USERNAME'],
             sql_dict['EMAIL'],
             sql_dict['PASSWORD'],
             sql_dict['2FA'],
             sql_dict['BACKUP'],
             sql_dict['OTHER'],
-            int(where)) 
+            int(where))
     cursor.execute(statement, values)
     conn.commit()
 
-def main():    
-    sql_dict['HOST'] = FPathApp.urler(sql_dict['HOST'])
+def main():
+    sql_dict['HOST'] = ender(urler(sql_dict['HOST']), "/")
     const = input(f"{ColorObj.information} Fetch data or edit (F/E)? ")
     if const == 'F':
         print(f"{ColorObj.good} Fetching data ..")
