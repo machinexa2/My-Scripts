@@ -2,49 +2,83 @@
 
 import discord
 import asyncio
-import os
 
 from requests import get
+from random import randrange
+from os import getenv as os_getenv
 from bs4 import BeautifulSoup
 from datetime import datetime
 from humanize import intcomma
 
 from lib.Globals import discord_server as myserver
 
-stonedbot_token = os.getenv('STONEDBOT_ACCESS_TOKEN')
+stonedbot_token = os_getenv('STONEDBOT_ACCESS_TOKEN')
 if not stonedbot_token:
     print("Token not found")
     exit()
 
+def percentage(a, b):
+    try:
+        return abs(((b - a) / b) * 100)
+    except ZeroDivisionError:
+        return 0
+
+def fetch_pulls(url):
+    response = BeautifulSoup(get(url).text, "html.parser")
+    for resp in response.find_all("span", {"data-content": "Pull requests"}):
+        for sibling in resp.next_siblings:
+            if not sibling or sibling == '\n':
+                continue
+            open_pr =  f"{sibling['title']}"
+    for resp in response.find_all("a", {"data-ga-click": "Pull Requests, Table state, Closed"}):
+        closed = str(resp).split('</path></svg>')[-1].strip(' ').split('Closed')[0].strip('\n').strip(' ')
+        break
+    return int(open_pr.replace(',', '')), int(closed.replace(',', ''))
+
+def fetch_corona():
+    response = BeautifulSoup(get("https://www.worldometers.info/coronavirus/").text, 'html.parser')
+    i, d = tuple(filter(lambda s: ',' in s, response.find_all('title')[0].text.lower().split(':')[-1].strip(' ').split('from')[0].strip(' ').split(' ')))
+    return int(i.replace(',', '')), int(d.replace(',', ''))
+
 class BotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.corona = "https://www.worldometers.info/coronavirus/"
-        self.bg_task = self.loop.create_task(self.publish_corona())
+        #self.loop.create_task(self.publish_corona())
+        self.cstart = False
+        self.loop.create_task(self.publish_personal())
 
     async def on_ready(self):
-        print(f"{client.user} is connected to Discord")
-        myguild = discord.utils.find(lambda g: g.name == myserver, client.guilds)
+        #server = discord.utils.find(lambda g: g.name == myserver, client.guilds)
+        #print(f"My Server: {server.name}({server.id})")
         print(f'Logged in as: {self.user.name}({self.user.id})')
-        print(f"My Server: {myguild.name}({myguild.id})")
 
     async def publish_corona(self):
         await self.wait_until_ready()
-        corona_channel = self.get_channel(790767464229109811)
-        while not self.is_closed():
-            infection, death = self.fetch_corona()
-            curdate = datetime.now().strftime("%B %d %Y")
+        channel = self.get_channel(790767464229109811)
+        while True:
+            infection, death = fetch_corona()
             send_string = f"**SARS-CoV-2 Status** ({datetime.now().strftime('%B %d %Y %H:%M:%S')})\n"
             send_string += f"Infection: {intcomma(infection)}\nDeath: {intcomma(death)}\n"
-            await corona_channel.send(send_string)
-            self.previous_infection, self.previous_death = infection, death
-            await asyncio.sleep(15500)
+            await channel.send(send_string)
+            await asyncio.sleep(randrange(15500))
 
-    def fetch_corona(self):
-        response = get(self.corona)
-        parsed_response = BeautifulSoup(response.text, 'html.parser')
-        infection, death = tuple(filter(lambda string: ',' in string, parsed_response.find_all('title')[0].text.lower().split(':')[-1].strip(' ').split('from')[0].strip(' ').split(' ')))
-        return int(infection.replace(',', '')), int(death.replace(',', ''))
-
+    async def publish_personal(self):
+        await self.wait_until_ready()
+        channel = self.get_channel(803301891772907552)
+        repositories = ("python/CPython", "golang/Go")
+        self.history = {_: {'active': 0, 'total': 0} for _ in repositories}
+        while True:
+            for _ in repositories:
+                active, closed = fetch_pulls(f"https://github.com/{_}/pulls")
+                active_increment = percentage(active, self.history[_]['active'])
+                total_increment = percentage(int(active + closed), self.history[_]['total'])
+                self.history[_]['active'] = active
+                self.history[_]['total'] = active + closed
+                send_string = f"**{_.split('/')[-1]}**: \nActive: {intcomma(active)} :white_check_mark:, Total: {intcomma(active + closed)} :skull_crossbones:\n"
+                if active_increment != 0 or total_increment != 0:
+                    send_string += f"Code improvement: {round(active_increment, 2)}%, Overall Improvement: {round(total_increment, 2)}%"
+                await channel.send(send_string)
+            await asyncio.sleep(randrange(25))
+            exec(input("Next round raise pulls"))
 client = BotClient()
 client.run(stonedbot_token)
