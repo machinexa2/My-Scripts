@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from termcolor import colored
 
 from lib.Globals import sql_dict, ColorObj
-from lib.PathFunctions import urler
+from lib.PathFunctions import urler, ender
 from lib.Functions import starter, connector
 
 parser = ArgumentParser(description=colored("Store and update passwords!",color='yellow'))

@@ -43,7 +43,6 @@ def fetch_corona():
 class BotClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.first_start = False
         self.loop.create_task(self.publish_corona())
         self.loop.create_task(self.publish_personal())
 
@@ -60,29 +59,17 @@ class BotClient(discord.Client):
             send_string = f"**SARS-CoV-2 Status** ({datetime.now().strftime('%B %d %Y %H:%M:%S')})\n"
             send_string += f"Infection: {intcomma(infection)}\nDeath: {intcomma(death)}\n"
             await channel.send(send_string)
-            await asyncio.sleep(randrange(15500))
+            await asyncio.sleep(randrange(86400))
 
     async def publish_personal(self):
         await self.wait_until_ready()
         channel = self.get_channel(803301891772907552)
-        repositories = ("python/CPython", "golang/Go")
-        self.history = {_: {'active': 0, 'total': 0} for _ in repositories}
+        repositories = ("python/CPython", "golang/Go", "nuitka/nuitka")
         while True:
             for _ in repositories:
                 active, closed = fetch_pulls(f"https://github.com/{_}/pulls")
-                if self.first_start:
-                    if active == self.history[_]['active'] and int(active + closed) == self.history[_]['total']:
-                        continue
-                active_increment = percentage(active, self.history[_]['active'])
-                total_increment = percentage(int(active + closed), self.history[_]['total'])
-                self.history[_]['active'] = active
-                self.history[_]['total'] = active + closed
-                self.first_start = True
                 send_string = f"**{_.split('/')[-1]}**: \nActive: {intcomma(active)} :white_check_mark:, Total: {intcomma(active + closed)} :skull_crossbones:\n"
-                if active_increment != 0 or total_increment != 0:
-                    send_string += f"Code improvement: {round(active_increment, 2)}%, Overall Improvement: {round(total_increment, 2)}%"
                 await channel.send(send_string)
-            await asyncio.sleep(randrange(15500))
-            exec(input("Next round raise pulls"))
+            await asyncio.sleep(randrange(86400))
 client = BotClient()
 client.run(stonedbot_token)
